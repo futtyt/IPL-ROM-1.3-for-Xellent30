@@ -26,6 +26,7 @@ https://youtu.be/Bep6caA0rm4
 * X68000本体(Xellent30を装着可能な機種に限る)
 * Xellent30
 * dis.x、HAS.X、hlk.r、CV.X
+
 (編集中...)
 
 # 免責事項
