@@ -25,7 +25,22 @@ https://youtu.be/Bep6caA0rm4
 * ROMライタ
 * X68000本体(Xellent30を装着可能な機種に限る)
 * Xellent30
-* dis.x、HAS.X、hlk.r、CV.X
+* dis.x、テキストマージツール、HAS.X、hlk.r、CV.X
+
+(1) X68030のIPL-ROM $fe0000～$ffffffを以下の名前でファイル化する。
+
+(2) 以下のオプションでIPL-ROMからソースコードを生成する。
+dis %1 %1.s -zfe0000,ff0038 -q -m680x0
+(3) テキストマージツールで本パッチを適用する。
+
+(4) 以下のオプションでソースコードをコンパイル、リンク、変換する。
+HAS.X -w2 -o%1.o %1.s
+hlk.r -b0xfe0000 -o%1.x %1.o
+CV.X /rn %1.x %1.r
+REN %1.r %1
+(5)ファイルをevenとoddに分割する。
+(6)ROMライタで焼く。
+(7)X68000に装着する。
 
 (編集中...)
 
