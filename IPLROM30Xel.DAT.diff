@@ -1,5 +1,5 @@
 --- base/IPLROM30Xel.DAT.s	Tue Mar  2 23:05:37 2021
-+++ 0.0.1/IPLROM30Xel.DAT.s	Tue Mar  2 22:54:50 2021
++++ 0.0.2/IPLROM30Xel.DAT.s	Thu Mar  4 20:51:12 2021
 @@ -8227,10 +8227,12 @@
  	.dc.l	$00ff9340,$00000000
  	.dc.l	$00000000,$203c1392
@@ -64,7 +64,7 @@
  	bra	Lff0e00
  Lff0e30:
  	nop
-@@ -26041,8 +26054,176 @@
+@@ -26041,8 +26054,180 @@
  	nop
  	jmp	(a0)
  
@@ -83,8 +83,12 @@
 +
 +	bsr	LGetXellent30_IO
 +	tst.w	d2
-+	bmi	LXellent30_Boot_Exit			;Xellent30のI/Oアドレスが見つからなかった場合は、何もしない。
++	bpl	LXellent30_Boot				;Xellent30のI/Oアドレスが見つかった場合は専用Boot処理へ。
 +
++	RESET
++	bra	LXellent30_Boot_Exit
++
++LXellent30_Boot:
 +	bsr	LCheckMpu
 +	tst.b	d0
 +	beq	LReset_Entry				;d0(0:MC68000、1:MC68030)動作中のMPUがMC68000であれば、ここでは切替え不要。
@@ -238,7 +242,7 @@
  Lffed6e:
 -	.dcb.b	4753,$ff
 +;	.dcb.b	4753,$ff
-+	.dcb.b	4753-1892-128*2,$ff
++	.dcb.b	4753-1892-130*2,$ff
  Lffffff:
  	.dc.b	$ff
  L000000:
