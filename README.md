@@ -27,6 +27,7 @@ https://youtu.be/Bep6caA0rm4
 # 導入方法
 事前に以下のものを用意してください。
 * 各種ツール
+
   DB.X、dis.x、テキストマージツール、HAS.X、hlk.r、CV.X
 
 * X68030のIPL-ROM $fe0000～$ffffff
