@@ -48,19 +48,15 @@ https://youtu.be/Bep6caA0rm4
 * ROMライタ(TL866II Plusなど)
 * X68000本体(Xellent30を装着可能な機種に限る)とXellent30
 
-(1) X68030のIPL-ROM $fe0000～$ffffffを以下の名前でファイル化する。
-
-IPLROM30Xel.DAT
-
-(2) dis.xを以下のオプションで実行してソースコードを生成する。
+(1) dis.xを以下のオプションで実行してソースコードを生成する。
 
 ```
 dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
 ```
 
-(3) テキストマージツールで本パッチを適用する。
+(2) テキストマージツールで本パッチを適用する。
 
-(4) 以下のオプションでソースコードをコンパイル、リンク、変換する。  
+(3) 以下のオプションでソースコードをコンパイル、リンク、変換する。  
 ```
   HAS.X -w2 -oIPLROM30Xel.DAT.o IPLROM30Xel.DAT.s  
   hlk.r -b0xfe0000 -oIPLROM30Xel.DAT.x IPLROM30Xel.DAT.o  
@@ -68,11 +64,11 @@ dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
   REN IPLROM30Xel.DAT.r IPLROM30Xel.DAT
 ```  
 
-(5)ファイルをevenとoddに分割する。
+(4)ファイルをevenとoddに分割する。
 
-(6)ROMライタで焼く。
+(5)ROMライタで焼く。
 
-(7)X68000に装着する。
+(6)X68000に装着する。
 
 (編集中...)
 
