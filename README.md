@@ -38,12 +38,11 @@ https://youtu.be/Bep6caA0rm4
 * UV-EPROM、EEPROM、FlashROM
 
   機種によって容量が異なります。  
-  ACE、EXPERT、PROの場合は512Kbit(64K x 8bit、28PinDIP)  
-  SUPERの場合は1Mbit(128K x 8bit、32PinDIP)  
-  XVIの場合は(調査中...)  
+  ACE、EXPERT、PROの場合は512Kbit(64K x 8bit、28pinDIP)  
+  SUPER、XVIの場合は1Mbit(128K x 8bit、32pinDIP)  
 
-  なお、SUPERのROMソケットは1MbitマスクROMを想定した28PinDIPですので、変換基板が必要です。  
-  変換基板の作り方(作成中...)  
+  なお、SUPERのROMソケットは1MbitマスクROMを想定した28pinDIPですので、変換が必要です。  
+  以下の図を参考にして結線してください。  
 ![1MbitROM](https://user-images.githubusercontent.com/79849812/109984038-bef76880-7d46-11eb-974c-343d74adccec.png)
 
 * ROMライタ(TL866II Plusなど)
