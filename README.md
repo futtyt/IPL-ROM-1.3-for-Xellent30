@@ -56,7 +56,8 @@ dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
 
 (2) テキストマージツールで本パッチを適用する。
 
-(3) 以下のオプションでソースコードをコンパイル、リンク、変換する。  
+(3) 添付のMakefileでソースコードをコンパイル、リンク、変換する。  
+  Makefileを利用しない場合は以下のコマンドを実行する。
 ```
   HAS.X -w2 -oIPLROM30Xel.DAT.o IPLROM30Xel.DAT.s  
   hlk.r -b0xfe0000 -oIPLROM30Xel.DAT.x IPLROM30Xel.DAT.o  
