@@ -21,30 +21,48 @@ https://youtu.be/Bep6caA0rm4
 
 # 動作実績
 以下の構成で動作することを確認しています。
-* X68000 PRO + Xellent30PRO + W27C512*2
-* X68000 SUPER + Xellent30s + W27E010*2
+* X68000 PRO + Xellent30PRO + W27C512 x 2
+* X68000 SUPER + Xellent30s + W27E010 x 2
 
 # 導入方法
 事前に以下のものを用意してください。
+* 各種ツール
+
+DB.X、dis.x、テキストマージツール、HAS.X、hlk.r、CV.X
+
 * X68030のIPL-ROM $fe0000～$ffffff
+
+X68030実機にてDB.Xを起動して以下のコマンドを入力する。  
+-w IPLROM30Xel.DAT,fe0000 ffffff
+
 * UV-EPROM、EEPROM、FlashROM
-* ROMライタ
-* X68000本体(Xellent30を装着可能な機種に限る)
-* Xellent30
-* dis.x、テキストマージツール、HAS.X、hlk.r、CV.X
+
+機種によって容量が異なります。  
+ACE、EXPERT、PROの場合は512Kbit(64K x 8bit、28PinDIP)  
+SUPERの場合は1Mbit(128K x 8bit、32PinDIP)  
+XVIの場合は(調査中...)  
+
+なお、SUPERのROMソケットは1MbitマスクROMを想定した28PinDIPですので、変換基板が必要です。  
+変換基板の作り方(作成中...)
+
+* ROMライタ(TL866II Plusなど)
+* X68000本体(Xellent30を装着可能な機種に限る)とXellent30
 
 (1) X68030のIPL-ROM $fe0000～$ffffffを以下の名前でファイル化する。
 
-(2) 以下のオプションでIPL-ROMからソースコードを生成する。  
-dis %1 %1.s -zfe0000,ff0038 -q -m680x0
+IPLROM30Xel.DAT
+
+(2) dis.xを以下のオプションで実行してソースコードを生成する。
+
+dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
 
 (3) テキストマージツールで本パッチを適用する。
 
 (4) 以下のオプションでソースコードをコンパイル、リンク、変換する。  
-HAS.X -w2 -o%1.o %1.s  
-hlk.r -b0xfe0000 -o%1.x %1.o  
-CV.X /rn %1.x %1.r  
-REN %1.r %1  
+HAS.X -w2 -oIPLROM30Xel.DAT.o IPLROM30Xel.DAT.s  
+hlk.r -b0xfe0000 -oIPLROM30Xel.DAT.x IPLROM30Xel.DAT.o  
+CV.X /rn IPLROM30Xel.DAT.x IPLROM30Xel.DAT.r  
+REN IPLROM30Xel.DAT.r IPLROM30Xel.DAT  
 
 (5)ファイルをevenとoddに分割する。
 
