@@ -27,23 +27,22 @@ https://youtu.be/Bep6caA0rm4
 # 導入方法
 事前に以下のものを用意してください。
 * 各種ツール
-
-DB.X、dis.x、テキストマージツール、HAS.X、hlk.r、CV.X
+  DB.X、dis.x、テキストマージツール、HAS.X、hlk.r、CV.X
 
 * X68030のIPL-ROM $fe0000～$ffffff
 
-X68030実機にてDB.Xを起動して以下のコマンドを入力する。  
--w IPLROM30Xel.DAT,fe0000 ffffff
+  X68030実機にてDB.Xを起動して以下のコマンドを入力する。  
+  -w IPLROM30Xel.DAT,fe0000 ffffff
 
 * UV-EPROM、EEPROM、FlashROM
 
-機種によって容量が異なります。  
-ACE、EXPERT、PROの場合は512Kbit(64K x 8bit、28PinDIP)  
-SUPERの場合は1Mbit(128K x 8bit、32PinDIP)  
-XVIの場合は(調査中...)  
+  機種によって容量が異なります。  
+  ACE、EXPERT、PROの場合は512Kbit(64K x 8bit、28PinDIP)  
+  SUPERの場合は1Mbit(128K x 8bit、32PinDIP)  
+  XVIの場合は(調査中...)  
 
-なお、SUPERのROMソケットは1MbitマスクROMを想定した28PinDIPですので、変換基板が必要です。  
-変換基板の作り方(作成中...)
+  なお、SUPERのROMソケットは1MbitマスクROMを想定した28PinDIPですので、変換基板が必要です。  
+  変換基板の作り方(作成中...)
 
 * ROMライタ(TL866II Plusなど)
 * X68000本体(Xellent30を装着可能な機種に限る)とXellent30
