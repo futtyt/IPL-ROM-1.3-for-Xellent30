@@ -33,7 +33,7 @@ https://youtu.be/Bep6caA0rm4
 * X68030のIPL-ROM $fe0000～$ffffff
 
   X68030実機にてDB.Xを起動して以下のコマンドを入力する。  
-  -w IPLROM30Xel.DAT,fe0000 ffffff
+  ```-w IPLROM30Xel.DAT,fe0000 ffffff```
 
 * UV-EPROM、EEPROM、FlashROM
 
@@ -54,15 +54,19 @@ IPLROM30Xel.DAT
 
 (2) dis.xを以下のオプションで実行してソースコードを生成する。
 
+```
 dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
+```
 
 (3) テキストマージツールで本パッチを適用する。
 
 (4) 以下のオプションでソースコードをコンパイル、リンク、変換する。  
-HAS.X -w2 -oIPLROM30Xel.DAT.o IPLROM30Xel.DAT.s  
-hlk.r -b0xfe0000 -oIPLROM30Xel.DAT.x IPLROM30Xel.DAT.o  
-CV.X /rn IPLROM30Xel.DAT.x IPLROM30Xel.DAT.r  
-REN IPLROM30Xel.DAT.r IPLROM30Xel.DAT  
+```
+  HAS.X -w2 -oIPLROM30Xel.DAT.o IPLROM30Xel.DAT.s  
+  hlk.r -b0xfe0000 -oIPLROM30Xel.DAT.x IPLROM30Xel.DAT.o  
+  CV.X /rn IPLROM30Xel.DAT.x IPLROM30Xel.DAT.r  
+  REN IPLROM30Xel.DAT.r IPLROM30Xel.DAT
+```  
 
 (5)ファイルをevenとoddに分割する。
 
