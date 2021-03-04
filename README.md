@@ -43,7 +43,8 @@ https://youtu.be/Bep6caA0rm4
   XVIの場合は(調査中...)  
 
   なお、SUPERのROMソケットは1MbitマスクROMを想定した28PinDIPですので、変換基板が必要です。  
-  変換基板の作り方(作成中...)
+  変換基板の作り方(作成中...)  
+![1MbitROM](https://user-images.githubusercontent.com/79849812/109984038-bef76880-7d46-11eb-974c-343d74adccec.png)
 
 * ROMライタ(TL866II Plusなど)
 * X68000本体(Xellent30を装着可能な機種に限る)とXellent30
