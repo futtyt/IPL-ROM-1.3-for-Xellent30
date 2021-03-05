@@ -28,7 +28,7 @@ https://youtu.be/Bep6caA0rm4
 事前に以下のものを用意してください。
 * 各種ツール
 
-  DB.X、dis.x、テキストマージツール、HAS.X、hlk.r、CV.X
+  DB.X、dis.x、テキストマージツール、HAS.X、hlk.r、CV.X、bup.x
 
 * X68030のIPL-ROM $fe0000～$ffffff
 
@@ -48,6 +48,9 @@ https://youtu.be/Bep6caA0rm4
 * ROMライタ(TL866II Plusなど)
 * X68000本体(Xellent30を装着可能な機種に限る)とXellent30
 
+【ROMイメージの生成】
+
+<ソースコードを利用する場合>
 (1) dis.xを以下のオプションで実行してソースコードを生成する。
 
 ```
@@ -65,11 +68,18 @@ dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
   REN IPLROM30Xel.DAT.r IPLROM30Xel.DAT
 ```  
 
-(4)ファイルをevenとoddに分割する。
+<バイナリ差分を利用する場合>
 
-(5)ROMライタで焼く。
+(1) バイナリ差分ファイルを適用する。
 
-(6)X68000に装着する。
+【ROMイメージの書込みと装着】
+(1)ファイルをevenとoddに分割する。
+
+(2)ROMライタで焼く。
+
+(3)X68000に装着する。
+  evenとodd、ROMの向きに注意して装着する。
+  ROM切替え用のディップスイッチを切替える。
 
 (編集中...)
 
