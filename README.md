@@ -50,7 +50,7 @@ https://youtu.be/Bep6caA0rm4
 
 【ROMイメージの生成】
 
-<ソースコードを利用する場合>
+<ソースコードを利用する場合>  
 (1) dis.xを以下のオプションで実行してソースコードを生成する。
 
 ```
@@ -59,17 +59,16 @@ dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
 
 (2) テキストマージツールで本パッチを適用する。
 
-(3) 添付のMakefileでソースコードをコンパイル、リンク、変換する。  
+(3) 添付のMakefileでソースコードをコンパイル、リンク、変換する。</br>  
   Makefileを利用しない場合は以下のコマンドを実行する。
 ```
-  HAS.X -w2 -oIPLROM30Xel.DAT.o IPLROM30Xel.DAT.s  
-  hlk.r -b0xfe0000 -oIPLROM30Xel.DAT.x IPLROM30Xel.DAT.o  
-  CV.X /rn IPLROM30Xel.DAT.x IPLROM30Xel.DAT.r  
+  HAS.X -w2 -oIPLROM30Xel.DAT.o IPLROM30Xel.DAT.s
+  hlk.r -b0xfe0000 -oIPLROM30Xel.DAT.x IPLROM30Xel.DAT.o
+  CV.X /rn IPLROM30Xel.DAT.x IPLROM30Xel.DAT.r
   REN IPLROM30Xel.DAT.r IPLROM30Xel.DAT
 ```  
 
-<バイナリ差分を利用する場合>
-
+<バイナリ差分を利用する場合>  
 (1) バイナリ差分ファイルを適用する。
 
 【ROMイメージの書込みと装着】
@@ -78,7 +77,7 @@ dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
 (2)ROMライタで焼く。
 
 (3)X68000に装着する。
-  evenとodd、ROMの向きに注意して装着する。
+  evenとodd、ROMの向きに注意して装着する。  
   ROM切替え用のディップスイッチを切替える。
 
 (編集中...)
