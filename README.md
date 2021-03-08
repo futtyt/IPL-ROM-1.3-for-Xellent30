@@ -35,6 +35,11 @@ https://youtu.be/Bep6caA0rm4
         X68030実機にてDB.Xを起動して以下のコマンドを入力する。  
         ```-w IPLROM30Xel.DAT,fe0000 ffffff```
 
+    * SCSI機の場合はX68030のROM30.DAT $fc0000～$fdffff
+
+        X68030実機にてDB.Xを起動して以下のコマンドを入力する。  
+        ```-w ROM30.DAT,fc0000 fdffff```
+
     * UV-EPROM、EEPROM、FlashROM
 
         機種によって容量が異なります。  
@@ -66,6 +71,7 @@ https://youtu.be/Bep6caA0rm4
         1. バイナリ差分ファイルを適用する。
 
 1. ROMイメージの書込みと装着
+    1. SCSI機の場合はROM30.DATとIPLROM30Xel.DATを結合する。
     1. ファイルをevenとoddに分割する。</br>
         XgproであればROMイメージを読み込む際のオプション設定を変更することで省略可能です。</br>
         ![Xgpro_select_even](https://user-images.githubusercontent.com/79849812/110272224-031b8f00-800d-11eb-93f1-6bb20c9d2970.png)</br>
