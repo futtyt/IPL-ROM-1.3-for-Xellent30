@@ -71,13 +71,17 @@ dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
 <バイナリ差分を利用する場合>  
 (1) バイナリ差分ファイルを適用する。
 
-【ROMイメージの書込みと装着】
-(1)ファイルをevenとoddに分割する。
+【ROMイメージの書込みと装着】</br>
+(1)ファイルをevenとoddに分割する。</br>
+  XgproであればROMイメージを読み込む際のオプション設定を変更することで省略可能です。</br>
+  ![Xgpro_select_even](https://user-images.githubusercontent.com/79849812/110272224-031b8f00-800d-11eb-93f1-6bb20c9d2970.png)</br>
+  even:「Load mode」を「Load a low byte of a WORD(2 bytes)」にする。</br>
+  odd:「Load mode」を「Load a high byte of a WORD(2 bytes)」にする。
 
 (2)ROMライタで焼く。
 
-(3)X68000に装着する。
-  evenとodd、ROMの向きに注意して装着する。  
+(3)X68000に装着する。</br>
+  evenとodd、ROMの向きに注意して装着する。</br>
   ROM切替え用のディップスイッチを切替える。
 
 (編集中...)
