@@ -1,5 +1,5 @@
 --- base/IPLROM30Xel.DAT.s	Tue Mar  2 23:05:37 2021
-+++ 0.0.3/IPLROM30Xel.DAT.s	Sat Mar 20 09:21:40 2021
++++ 0.0.4/IPLROM30Xel.DAT.s	Sat Jul  3 17:11:36 2021
 @@ -8227,10 +8227,12 @@
  	.dc.l	$00ff9340,$00000000
  	.dc.l	$00000000,$203c1392
@@ -28,6 +28,15 @@
  	move.l	($0030),d6
  	lsl.l	#8,d6
  	lsr.l	#8,d6
+@@ -8273,7 +8281,7 @@
+ 	dbra	d0,Lff00a0
+ 	lea.l	(Lff07be,pc),a0
+ 	move.l	a0,($07fc)
+-	lea.l	(Lff03f2,pc),a0
++	lea.l	(L_IOCS_IPLERR_fe,pc),a0
+ 	move.l	a0,($07f8)
+ 	lea.l	(Lff07cc,pc),a0
+ 	move.l	a0,($07f4)
 @@ -8355,7 +8363,7 @@
  	move.w	#$2000,sr
  	bsr	Lff05be
@@ -37,17 +46,20 @@
  	move.b	#$04,($00e8a01f)
  	tst.b	($00e9a001)
  	tst.b	($00e9a001)
-@@ -8451,49 +8459,37 @@
+@@ -8450,159 +8458,167 @@
+ 	bsr	Lff080a
  	jsr	(a0)
  	bra	Lff1a16
- Lff0300:
+-Lff0300:
 -	move.w	($00ed0092),d0
 -	bne	Lff030c
 -	move.w	#$0a04,d0
--Lff030c:
-+;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-+;/_/_/  起動画面表示中にXF1、またはXF3キーを押下していた場合の処理
- 	lea.l	($0800),a1
++Lff0300:	; XF1～XF5キー押下による起動方法切替
++	move.w	($00ed0092),d0					; D0レジスタをSRAM 10/16MHz 相当のウェイト値にする。
++	bne	Lff030c						; SRAM 10MHz 相当のウェイト値が0であれば、
++	move.w	#$0a04,d0					; D0レジスタを$0a04($0a:10MHz相当、$04:16MHz相当)にする。
+ Lff030c:
+-	lea.l	($0800),a1
 -	btst.b	#$01,($000b,a1)
 -	bne	Lff033c
 -	btst.b	#$00,($000b,a1)
@@ -67,22 +79,40 @@
 -	add.l	($0006,a0),d0
 -	lea.l	($001c,a0),a0
 -	lea.l	($6800),a1
--Lff0350:
++	lea.l	($0800),a1					; A1レジスタをIOCSワーク キーの押し下げ状態にする。
++	btst.b	#$01,($000b,a1)					; XF5キーが、
++	bne	Lff033c						; 押されていればLff033cへジャンプする。
++;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
++;/_/_/  電源オン、またはリセットボタン押下と同時にXF4キーを押下していた場合の処理
++	jsr	LCheckXF4Key
++;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
++;	btst.b	#$00,($000b,a1)					; XF4キーが、
++	bne	Lff0328						; 押されていればLff0328へジャンプする。
++	tst.b	($000a,a1)					; XF3キーが、
++	bpl	Lff0360						; 押されていなければLff0360へジャンプする。
++	lsr.w	#8,d0						; XF3キー押下によりメモリウェイトを10MHz相当(X68030のみ有効)、キャッシュオフにしてHuman68k v2.15(ROM)で起動する。
++Lff0328:	; XF4キー押下によりメモリウェイトを16MHz相当(X68030のみ有効)、キャッシュオフにしてHuman68k v2.15(ROM)で起動する。
++	cmpi.b	#$01,($0cbc)					; MPUがMC68010
++	bls	Lff033c						; 以下であればLff033cへジャンプする。
++	move.b	d0,($00e8e009)					; System Port #5のROM Waitを0、DRAM Waitを$a:10MHz相当か、$0:16MHz相当にする。
++	moveq.l	#$00,d0						; D0レジスタを0クリアする。
++	movec.l	d0,cacr						; キャッシュをすべてオフにする。
++Lff033c:	; XF5キー押下によりメモリウェイト、キャッシュの設定を変更せずにHuman68k v2.15(ROM)で起動する。
++	movea.l	(Lff000c,pc),a0					; A0レジスタをHuman68k v2.15(ROM)のサイズ格納先($fc0200)にする。
++	move.l	($0002,a0),d0					; D0レジスタをROMサイズ($DC0C=$A822+$33EA)にする。
++	add.l	($0006,a0),d0					;
++	lea.l	($001c,a0),a0					; A0レジスタをHuman68k v2.15(ROM)の先頭アドレス($fc021c)にする。
++	lea.l	($6800),a1					; A1レジスタをブート領域の先頭アドレス($6800)にする。
+ Lff0350:
 -	move.b	(a0)+,(a1)+
 -	subq.l	#1,d0
 -	bne	Lff0350
 -	move.b	#$90,($09e0)
 -	jmp	($6800)
-+	btst.b	#$05,($000a,a1)				; XF1キー
-+	bne	LCheckXF1Key
-+	btst.b	#$07,($000a,a1)				; XF3キー
-+	bne	LCheckXF3Key
-+	bra	Lff0386
- 
+-
 -Lff0360:
-+LCheckXF1Key:
- 	cmpi.b	#$01,($0cbc)
- 	bls	Lff0386
+-	cmpi.b	#$01,($0cbc)
+-	bls	Lff0386
 -	btst.b	#$06,($000a,a1)
 -	bne	Lff037a
 -	btst.b	#$05,($000a,a1)
@@ -92,29 +122,397 @@
 -	move.b	d0,($00e8e009)
 -	moveq.l	#$00,d0
 -	movec.l	d0,cacr
-+	move.b	#0,($cbc)				; IOCSワークのMPU 種別を 0(68000)にする。
-+	bra	@f
+-Lff0386:
+-	move.w	($00ed0018),d1
+-	beq	Lff03ac
+-	btst.b	#$02,($000e,a1)
+-	bne	Lff03ac
+-	move.w	d1,d0
+-	and.w	#$f000,d0
+-	rol.w	#4,d0
+-	subq.w	#8,d0
+-	beq	Lff03d8
+-	subq.w	#2,d0
+-	bcs	Lff03ce
+-	beq	Lff03de
+-	subq.w	#1,d0
+-	beq	Lff03e2
+-Lff03ac:
+-	bsr	Lff0524
+-	bsr	Lff04a8
+-	bsr	Lff045e
+-	bsr	Lff048e
+-	bra	Lff03f2
+-Lff03be:
+-	move.w	d1,-(a7)
+-	moveq.l	#$05,d2
+-	bsr	Lff03e8
+-	move.w	(a7)+,d1
+-	lea.l	(Lff0b88,pc),a1
+-	bsr	Lff0728
+-Lff03ce:
+-	bsr	Lff04fa
+-	bsr	Lff0544
+-	bra	Lff03ac
+-Lff03d8:
++	move.b	(a0)+,(a1)+					; Human68k v2.15(ROM)をブート領域にコピーする。
++	subq.l	#1,d0						;
++	bne	Lff0350						;
++	move.b	#$90,($09e0)					; 起動ユニット番号(PDA)を2HD 0($90)にする。
++	jmp	($6800)						; ブート開始
 +
-+LCheckXF3Key:
-+	cmpi.b	#$01,($0cbc)
-+	bhi	Lff0386
-+	move.b	#3,($cbc)				; IOCSワークのMPU 種別を 3(68030)にする。
-+
-+@@:
-+	jsr	LGetXellent30_IO
-+	cmpa.l	#0,a0
-+	beq	Lff0386					; Xellent30が存在しない場合は変更しない。
-+
-+	move.w	#$2700,sr
-+	jmp	LXellent30_Change_MPU_Entry		; MPU変更へ
-+
-+	.dcb.b	29*2,$ff				; サイズ調整
++Lff0360:	; XF3、XF4、XF5いずれのキーも押されていない場合
++	cmpi.b	#$01,($0cbc)					; MPUがMC68010
++	bls	Lff0386						; 以下であればLff0386へジャンプする。
 +;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
++;/_/_/  電源オン、またはリセットボタン押下と同時にXF2キーを押下していた場合の処理
++	jsr	LCheckXF2Key
++;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
++;	btst.b	#$06,($000a,a1)					; XF2キー
++	bne	Lff037a						; 押されていればLff037aへジャンプする。
++	btst.b	#$05,($000a,a1)					; XF1キー
++	beq	Lff0386						; 押されていなければLff0386へジャンプする。
++	lsr.w	#8,d0						; XF1キー押下によりメモリウェイトを10MHz相当(X68030のみ有効)、キャッシュオフにして起動処理を続行する。
++Lff037a:	; XF2キー押下によりメモリウェイトを16MHz相当(X68030のみ有効)、キャッシュオフにして起動処理を続行する。
++	move.b	d0,($00e8e009)					; IOMAP ROM/DRAM ウェイト数制御をD0レジスタ値にする。
++	moveq.l	#$00,d0						; D0レジスタを0クリアする。
++	movec.l	d0,cacr						; キャッシュをすべてオフにする。
++Lff0386:	; SRAM 最優先ブートデバイス順に起動
++	move.w	($00ed0018),d1					; SRAM 最優先ブートデバイス
++	beq	Lff03ac						; STDであればLff03acへジャンプする。
++	btst.b	#$02,($000e,a1)					; OPT.1キー
++	bne	Lff03ac						; 押下していればLff03acへジャンプする。
++	move.w	d1,d0						; D0レジスタをSRAM 最優先ブートデバイスにする。
++	and.w	#$f000,d0					; D0レジスタをブートデバイス種別にする。
++	rol.w	#4,d0						; $8:HD、$9:2HD、$a:ROM、$b:RAM
++	subq.w	#8,d0						; ブートデバイス種別が
++	beq	Lff03d8						; $8:HDであればLff03d8へジャンプする。
++	subq.w	#2,d0						; ブートデバイス種別が
++	bcs	Lff03ce						; $9:2HDであればLff03ceへジャンプする。
++	beq	Lff03de						; $a:ROMであればLff03deへジャンプする。
++	subq.w	#1,d0						; ブートデバイス種別が
++	beq	Lff03e2						; $b:RAMであればLff03e2へジャンプする。
++Lff03ac:	; 起動処理 STD
++	bsr	Lff0524						; 起動処理 2HD 0～3
++	bsr	Lff04a8						; 起動処理 HD 0～15
++	bsr	Lff045e						; 起動処理 ROM
++	bsr	Lff048e						; 起動処理 RAM
++	bra	L_IOCS_IPLERR_fe				; 2HD 起動ディスク挿入待ちメッセージを表示する。
++Lff03be:	; 2HD 起動ディスク挿入待ちメッセージからの起動
++	move.w	d1,-(a7)					; D1レジスタをスタックに積む。
++	moveq.l	#$05,d2						; D2レジスタをディスクがセットされていない時 LED 消灯にする。
++	bsr	Lff03e8						; 2HD 0～3 ドライブの状態設定をディスクがセットされていない時 LED 消灯にする。
++	move.w	(a7)+,d1					; スタックからD1レジスタに戻す。
++	lea.l	(Lff0b88,pc),a1					; $1a,$00
++	bsr	Lff0728						; 文字列表示(IN A1:文字列のアドレス OUT D0:表示後のカーソル位置(桁、行)、A1:文字列終端NULLのアドレス)
++Lff03ce:	; 起動処理 2HD
++	bsr	Lff04fa						; 起動対象の2HDに対してドライブの状態検査(350回試行)を行う。
++	bsr	Lff0544						; 起動処理 2HD 0～3
++	bra	Lff03ac						; 起動処理 STDからやり直す。(起動可能なドライブが見つからなかった場合のみ、ここに戻ってくる。)
++Lff03d8:	; 起動処理 HD
+ 	bsr	Lff04be
+-	bra	Lff03ac
+-Lff03de:
++	bra	Lff03ac						; 起動処理 STDからやり直す。(起動可能なドライブが見つからなかった場合のみ、ここに戻ってくる。)
++Lff03de:	; 起動処理 ROM
+ 	bsr	Lff045e
+-	bra	Lff03ac
+-Lff03e2:
++	bra	Lff03ac						; 起動処理 STDからやり直す。(起動可能なドライブが見つからなかった場合のみ、ここに戻ってくる。)
++Lff03e2:	; 起動処理 RAM
+ 	bsr	Lff048e
+-	bra	Lff03ac
++	bra	Lff03ac						; 起動処理 STDからやり直す。(起動可能なドライブが見つからなかった場合のみ、ここに戻ってくる。)
+ Lff03e8:
+-	move.w	#$9070,d1
+-	IOCS	_B_DRVCHK
+-	rts
+-
+-Lff03f2:
+-	bsr	Lff07e8
+-	lea.l	($2000),a7
+-	tst.b	($09de)
+-	bne	Lff0446
+-	lea.l	(Lff0a90,pc),a1
+-	bsr	Lff0728
+-	bset.b	#$00,($00e8002a)
+-	lea.l	(Lff0820,pc),a1
+-	move.w	(Lff09e4,pc),d1
+-	move.w	(Lff09e6,pc),d2
+-	IOCS	_TEXTPUT
+-	bclr.b	#$00,($00e8002a)
+-	moveq.l	#$04,d2
+-	bsr	Lff03e8
++	move.w	#$9070,d1					; 2HD 0 ドライブの
++	IOCS	_B_DRVCHK					; 2HD ドライブの状態設定をして
++	rts							; 呼び出し元に戻る。
 +
- Lff0386:
- 	move.w	($00ed0018),d1
- 	beq	Lff03ac
-@@ -9240,7 +9236,7 @@
++L_IOCS_IPLERR_fe:	; 再起動する
++	bsr	Lff07e8						; CRTモードが19であればテキスト画面を(64, 16)へスクロールする。
++	lea.l	($2000),a7					; スタックポインタを$2000にする。
++	tst.b	($09de)						; IOCSワーク ROM デバッガ起動スイッチ(0:off !0:on)が
++	bne	Lff0446						; OFFであれば、
++	lea.l	(Lff0a90,pc),a1					; A1レジスタを$00ff0a90にして、 '   ',$1b,'[16;26H      ディスクから起動できません。    ',$1b,'[17;26H 正しいディスクをセットしてください。 ',$1b,'[18;26H'
++	bsr	Lff0728						; 文字列表示(IN A1:文字列のアドレス OUT D0:表示後のカーソル位置(桁、行)、A1:文字列終端NULLのアドレス)
++	bset.b	#$00,($00e8002a)				; CRTコントローラ 同時アクセス/ラスタコピー/高速クリアプレーン撰択のCP0を1にする。
++	lea.l	(Lff0820,pc),a1					; データバッファのアドレスを$00ff0820に、
++	move.w	(Lff09e4,pc),d1					; X 座標を504に、
++	move.w	(Lff09e6,pc),d2					; Y 座標を224にして
++	IOCS	_TEXTPUT					; テキスト VRAM のドット単位書き込みを実行する。
++	bclr.b	#$00,($00e8002a)				; CRTコントローラ 同時アクセス/ラスタコピー/高速クリアプレーン撰択のCP0を0に戻す。
++	moveq.l	#$04,d2						; ディスクがセットされていない時 LED 点滅で
++	bsr	Lff03e8						; 2HD 0 ドライブの状態設定を設定する。
+ Lff042c:
+-	move.w	#$9070,d1
++	move.w	#$9070,d1					; 2HD 0 ドライブの
+ Lff0430:
+-	IOCS	_B_DRVSNS
+-	btst.l	#$1d,d0
+-	bne	Lff03be
+-	add.w	#$0100,d1
+-	cmp.w	#$9470,d1
+-	bne	Lff0430
+-	bra	Lff042c
+-Lff0446:
+-	lea.l	(Lff0a43,pc),a1
+-	bsr	Lff0728
+-	move.w	#$007c,-(a7)
+-	pea.l	(Lff0038,pc)
+-	move.w	sr,-(a7)
+-	move.l	($007c),-(a7)
+-	rts
+-
+-Lff045e:
+-	movea.l	($00ed000c),a0
+-	movea.l	a7,a6
+-	lea.l	(Lff0486,pc),a1
+-	movea.l	($0008),a2
+-	move.l	a1,($0008)
+-	movea.l	(a0),a3
+-	move.l	a2,($0008)
+-	move.b	#$01,($09e0)
+-	bsr	Lff080a
+-	jsr	(a3)
+-	rts
+-
+-Lff0486:
+-	movea.l	a6,a7
+-	move.l	a2,($0008)
+-	rts
++	IOCS	_B_DRVSNS					; ドライブの状態検査をして
++	btst.l	#$1d,d0						; FDC ステータス ドライブのReady信号の状態が
++	bne	Lff03be                                         ; 有効であればLff03beへジャンプする。無効であれば
++	add.w	#$0100,d1					; 次のドライブを
++	cmp.w	#$9470,d1					; 2HD 3 ドライブまで
++	bne	Lff0430						; ドライブの状態検査をする。
++	bra	Lff042c						; 2HD 0 ドライブからやり直す。
++Lff0446:							; IOCSワーク ROM デバッガ起動スイッチ(0:off !0:on)がONであれば、
++	lea.l	(Lff0a43,pc),a1					; A1レジスタを$00ff0a43にして、 $1b,'[16;30Hディスクから起動できません。  ',$1b,'[17;30Hター','ミナルモニタを起動します。',$00
++	bsr	Lff0728						; 文字列表示(IN A1:文字列のアドレス OUT D0:表示後のカーソル位置(桁、行)、A1:文字列終端NULLのアドレス)
++	move.w	#$007c,-(a7)					; $007cをスタックに積む。
++	pea.l	(Lff0038,pc)					; $00ff0038をスタックに積む。
++	move.w	sr,-(a7)					; ステータスレジスタをスタックに積む。
++	move.l	($007c),-(a7)					; レベル  7 割り込み(NMI)の例外ベクタをスタックに積む。
++	rts							; ROMデバッガを起動する。(NMI割込みによるROMデバッガ起動処理と同じシーケンス)
++
++Lff045e:	; 起動処理 ROM($fc???? の場合 ID=????/4 の SCSI から起動)
++	movea.l	($00ed000c),a0					; A0レジスタをSRAM ROM 起動アドレス(1.l)へのポインタにする。
++	movea.l	a7,a6						; A6レジスタをスタックポインタにする。
++	lea.l	(Lff0486,pc),a1					;
++	movea.l	($0008),a2					; A2レジスタを例外ベクタ アドレスエラーにする。
++	move.l	a1,($0008)					; 例外ベクタ アドレスエラーを$00ff0486にする。
++	movea.l	(a0),a3						; A3レジスタをSRAM ROM 起動アドレスにする。
++	move.l	a2,($0008)					; 例外ベクタ アドレスエラーを元に戻す。
++	move.b	#$01,($09e0)					; IOCSワーク 起動ユニット番号(PDA)をROMにする。
++	bsr	Lff080a						; テキスト画面を(0, 0)へスクロールする。
++	jsr	(a3)						; SRAM ROM 起動アドレスから起動する。
++	rts							; 呼び出し元に戻る。
++
++Lff0486:	; アドレスエラー発生時の処理
++	movea.l	a6,a7						; スタックポインタを元に戻す。
++	move.l	a2,($0008)					; 例外ベクタ アドレスエラーを元に戻す。
++	rts							; 呼び出し元に戻る。
+ 
+-Lff048e:
++Lff048e:	; 起動処理 RAM
+ 	movea.l	($00ed0010),a0
+ 	cmpi.b	#$60,(a0)
+ 	bne	Lff04a6
+-	move.b	#$02,($09e0)
++	move.b	#$02,($09e0)					; IOCSワーク 起動ユニット番号(PDA)をRAMにする。
+ 	bsr	Lff080a
+ 	jsr	(a0)
+ Lff04a6:
+ 	rts
+ 
+-Lff04a8:
++Lff04a8:	; 起動処理 HD 0～15(SCSIバス上のSASIディスク)
+ 	move.w	#$8000,d1
+ Lff04ac:
+ 	bsr	Lff04be
+@@ -8614,7 +8630,7 @@
+ Lff04bc:
+ 	rts
+ 
+-Lff04be:
++Lff04be:	; 起動処理 HD(D1レジスタ $8000～$8f00)
+ 	moveq.l	#$00,d2
+ 	move.l	#$00000400,d3
+ 	lea.l	($2000),a1
+@@ -8629,90 +8645,90 @@
+ 	bne	Lff04f0
+ 	cmpi.b	#$60,(a1)
+ 	bne	Lff04f0
+-	lsr.w	#8,d1
+-	move.b	d1,($09e0)
++	lsr.w	#8,d1						; D1レジスタを$80～$8fにする。
++	move.b	d1,($09e0)					; IOCSワーク 起動ユニット番号(PDA)をSASI-HD 0～15($80～$8f)にする。
+ 	bsr	Lff080a
+ 	jmp	(a1)
+ 
+ Lff04f0:
+ 	move.l	d0,-(a7)
+-	IOCS	_B_EJECT
++	IOCS	_B_EJECT					; ディスクのシッピング
+ 	move.l	(a7)+,d0
+ 	rts
+ 
+-Lff04fa:
+-	movem.l	d0-d2,-(a7)
+-	move.w	#$015d,d2
++Lff04fa:	; ドライブの状態検査(350回試行)
++	movem.l	d0-d2,-(a7)					; D0～D2レジスタをスタックに積む。
++	move.w	#$015d,d2					; ドライブの状態検査の試行回数を350回にする。
+ Lff0502:
+-	move.l	#$000000c8,d0
+-	bsr	Lff0d12
+-	IOCS	_B_DRVSNS
+-	btst.l	#$1d,d0
+-	dbne	d2,Lff0502
+-	movem.l	(a7)+,d0-d2
+-	rts
++	move.l	#$000000c8,d0					; 
++	bsr	Lff0d12						; タイマ C 割込みが200回発生するまで待つ。
++	IOCS	_B_DRVSNS					; IOCSコール ドライブの状態検査
++	btst.l	#$1d,d0						; FDC ステータス ドライブのReady信号の状態が
++	dbne	d2,Lff0502					; 有効になるか、350回試行しても無効のままであれば
++	movem.l	(a7)+,d0-d2					; D0～D2レジスタをスタックから戻して
++	rts							; 呼出し元に戻る。
+ 
+-Lff051e:
++Lff051e:	; 2HD イジェクト
+ 	IOCS	_B_EJECT
+ 	rts
+ 
+-Lff0524:
+-	move.w	#$9070,d1
++Lff0524:	; 起動処理 2HD 0～3
++	move.w	#$9070,d1					; 2HD 0
+ 	bsr	Lff04fa
+ 	lea.l	(Lff0544,pc),a1
+ 	bsr	Lff0544
+-	move.w	#$9170,d1
++	move.w	#$9170,d1					; 2HD 1
+ 	bsr	Lff0544
+-	move.w	#$9270,d1
++	move.w	#$9270,d1					; 2HD 2
+ 	bsr	Lff0544
+-	move.w	#$9370,d1
++	move.w	#$9370,d1					; 2HD 3
+ 	bsr	Lff0544
+ 	rts
+ 
+-Lff0544:
+-	moveq.l	#$01,d2
+-	move.l	#$00000400,d3
+-	lea.l	($2000),a1
+-	movem.l	d1-d4/a1,-(a7)
+-	move.w	#$013f,d4
++Lff0544:	; 起動処理 2HD
++	moveq.l	#$01,d2						; D2レジスタを$00000002にする。
++	move.l	#$00000400,d3					; ディスクからの読み込みバイト数を1,024バイトにする。
++	lea.l	($2000),a1					; ディスクからの読み込みバッファの先頭を$2000にする。
++	movem.l	d1-d4/a1,-(a7)					; D1～D4、A1レジスタをスタックに積む。
++	move.w	#$013f,d4					; ドライブの状態検査の試行回数を320回にする。
+ Lff0558:
+-	IOCS	_B_DRVSNS
+-	btst.l	#$1d,d0
+-	dbne	d4,Lff0558
+-	beq	Lff05b4
+-	IOCS	_B_RECALI
+-	btst.l	#$1e,d0
+-	bne	Lff05b4
+-	IOCS	_B_READID
+-	btst.l	#$1e,d0
+-	bne	Lff05b4
+-	move.w	d1,d0
+-	lsr.w	#8,d0
+-	and.w	#$0003,d0
+-	lsl.w	#3,d0
+-	lea.l	($0c90),a0
+-	adda.w	d0,a0
+-	moveq.l	#$00,d0
+-	move.b	($0006,a0),d0
+-	ror.l	#8,d0
+-	or.l	d0,d2
+-	moveq.l	#$46,d0
+-	move.l	a1,-(a7)
+-	trap	#15
+-	movea.l	(a7)+,a1
+-	btst.l	#$1e,d0
+-	bne	Lff05b4
+-	cmpi.b	#$60,(a1)
+-	bne	Lff05b4
+-	lsr.w	#8,d1
+-	move.b	d1,($09e0)
+-	bsr	Lff080a
+-	jmp	(a1)
+-
+-Lff05b4:
+-	IOCS	_B_EJECT
+-	movem.l	(a7)+,d1-d4/a1
+-	rts
++	IOCS	_B_DRVSNS					; IOCSコール ドライブの状態検査
++	btst.l	#$1d,d0						; FDC ステータス ドライブのReady信号の状態が
++	dbne	d4,Lff0558					; 有効になるか、320回試行しても無効のままであれば
++	beq	Lff05b4						; 無効のままであれば異常終了する。
++	IOCS	_B_RECALI					; IOCSコール ディスクのリキャリブレイト
++	btst.l	#$1e,d0						; リザルトステータス 0のInterrupt Codeが
++	bne	Lff05b4						; 正常終了となっていなければ異常終了する。
++	IOCS	_B_READID					; IOCSコール 2HD の ID 情報の読み出し
++	btst.l	#$1e,d0						; リザルトステータス 0のInterrupt Codeが
++	bne	Lff05b4						; 正常終了となっていなければ異常終了する。
++	move.w	d1,d0						; PDAから
++	lsr.w	#8,d0						; 処理中のドライブ番号を
++	and.w	#$0003,d0					; 抽出して
++	lsl.w	#3,d0						; FDn リザルトステータス受信バッファのオフセット値を計算する。(0、8、16、32)
++	lea.l	($0c90),a0					; A0レジスタを
++	adda.w	d0,a0						; FDn リザルトステータス受信バッファにする。(n:処理中のドライブ番号0～4)
++	moveq.l	#$00,d0						; D0レジスタを0クリアする。
++	move.b	($0006,a0),d0					; D0レジスタのバイト範囲をリザルトステータスの1セクタあたりのリードサイズにする。
++	ror.l	#8,d0						; D0レジスタを8ビット右ローテートする。
++	or.l	d0,d2						; D2レジスタに結合する。
++	moveq.l	#$46,d0						; IOCSコール _B_READ ディスクからの読み込み
++	move.l	a1,-(a7)					; 
++	trap	#15						; 
++	movea.l	(a7)+,a1					; 
++	btst.l	#$1e,d0						; リザルトステータス 0のInterrupt Codeが
++	bne	Lff05b4						; 正常終了となっていなければ異常終了する。
++	cmpi.b	#$60,(a1)					; 2HD IPLの先頭が$60
++	bne	Lff05b4						; でなければ異常終了する。
++	lsr.w	#8,d1						; PDAを8ビット右へシフトして
++	move.b	d1,($09e0)					; IOCSワーク 起動ユニット番号(PDA)を2HD	0～ 3($90～$93)にする。
++	bsr	Lff080a						; テキスト画面の(0, 0)に移動する。
++	jmp	(a1)						; ディスクから読み込んだIPLで起動する。
++
++Lff05b4:	; 異常終了
++	IOCS	_B_EJECT					; ディスクをイジェクトして
++	movem.l	(a7)+,d1-d4/a1					; D1～D4、A1レジスタをスタックから戻して
++	rts							; 呼び出し元に戻る。
+ 
+ Lff05be:
+ 	move.l	#$ffffffff,($09d2)
+@@ -9240,7 +9256,7 @@
  	suba.l	d0,a0
  	cmpa.w	#$0006,a0
  	beq	Lff0e00
@@ -123,7 +521,7 @@
  	bra	Lff0e00
  Lff0e30:
  	nop
-@@ -26041,8 +26037,165 @@
+@@ -26041,8 +26057,229 @@
  	nop
  	jmp	(a0)
  
@@ -284,9 +682,73 @@
 +	rts
 +;*****************************************************************************
 +
++;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
++;/_/_/  X68000で電源オン、またはリセットボタン押下と同時にXF2キーを押下していた場合は
++;/_/_/  MPUをMC68000へ切替える。
++;/_/_/  IN  なし
++;/_/_/  OUT なし
++LCheckXF2Key:
++	movem.l	d1/a1,-(sp)
++	move.b	($00e8e00b),d1
++	cmp.b	#$dc,d1						; X68030の場合は
++	beq	LCheckXF2Key_NormalExit				; XF2キー押下の通常動作に戻る。LCheckXF2Key_NormalExitへジャンプする。
++
++	lea.l	($0800),a1					; A1レジスタをIOCSワーク キーの押し下げ状態にする。
++	btst.b	#$06,($000a,a1)					; XF2キー
++	beq	@f						; 押下されていなければ切替えない。@fへジャンプする。
++	cmpi.b	#$01,($0cbc)					; 稼働中のMPUが
++	bls	@f						; MC68010以下であれば切替えない。@fへジャンプする。
++	move.b	#0,($cbc)					; IOCSワークのMPU 種別を 0(68000)にする。
++	move.w	#$2700,sr
++	bra	LXellent30_Change_MPU_Entry			; MPU変更へ
++
++@@:
++	cmp.b	d1,d1						; Zフラグを落とす。※呼出し元のキー押下チェックをスルーするため。
++	bra	LCheckXF2Key_Exit
++
++LCheckXF2Key_NormalExit;
++	btst.b	#$05,($000a,a1)					; XF2キーのチェックをする。
++
++LCheckXF2Key_Exit;
++	movem.l	(sp)+,d1/a1
++	rts							; 呼出し元に戻る。
++;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
++
++;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
++;/_/_/  X68000で電源オン、またはリセットボタン押下と同時にXF4キーを押下していた場合は
++;/_/_/  MPUをMC68030へ切替える。
++;/_/_/  IN  なし
++;/_/_/  OUT なし
++LCheckXF4Key:
++	movem.l	d1/a1,-(sp)
++	move.b	($00e8e00b),d1
++	cmp.b	#$dc,d1						; X68030の場合は
++	beq	LCheckXF4Key_NormalExit				; XF4キー押下の通常動作に戻る。LCheckXF2Key_NormalExitへジャンプする。
++
++	lea.l	($0800),a1					; A1レジスタをIOCSワーク キーの押し下げ状態にする。
++	btst.b	#$00,($000b,a1)					; XF4キー
++	beq	@f						; 押下されていなければ切替えない。@fへジャンプする。
++	cmpi.b	#$01,($0cbc)					; 稼働中のMPUが
++	bhi	@f						; MC68010より上位版であれば切替えない。@fへジャンプする。
++	move.b	#3,($cbc)					; IOCSワークのMPU 種別を 3(68030)にする。
++	move.w	#$2700,sr
++	bra	LXellent30_Change_MPU_Entry			; MPU変更へ
++
++@@:
++	cmp.b	d1,d1						; Zフラグを落とす。※呼出し元のキー押下チェックをスルーするため。
++	bra	LCheckXF4Key_Exit
++
++LCheckXF4Key_NormalExit;
++	btst.b	#$00,($000b,a1)					; XF4キーのチェックをする。
++
++LCheckXF4Key_Exit;
++	movem.l	(sp)+,d1/a1
++	rts							; 呼出し元に戻る。
++;/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
++
  Lffed6e:
 -	.dcb.b	4753,$ff
-+	.dcb.b	4753-1892-125*2,$ff
++	.dcb.b	4753-1892-191*2,$ff
  Lffffff:
  	.dc.b	$ff
  L000000:
