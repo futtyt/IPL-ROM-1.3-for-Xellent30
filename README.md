@@ -49,6 +49,8 @@ https://youtu.be/Bep6caA0rm4
         なお、SUPERのROMソケットは1MbitマスクROMを想定した28pinDIPですので、変換が必要です。  
         以下の図を参考にして結線してください。  
         ![1MbitROM](https://user-images.githubusercontent.com/79849812/109984038-bef76880-7d46-11eb-974c-343d74adccec.png)
+        
+        試作基板のKiCADデータをROM28toEPROM32フォルダに格納しました。
 
     * ROMライタ(TL866II Plusなど)
     * X68000本体(Xellent30を装着可能な機種に限る)とXellent30
