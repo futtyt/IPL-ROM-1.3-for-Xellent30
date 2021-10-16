@@ -58,6 +58,8 @@ https://youtu.be/Bep6caA0rm4
         以下の図を参考にして結線してください。  
         ![1MbitROM](https://user-images.githubusercontent.com/79849812/109984038-bef76880-7d46-11eb-974c-343d74adccec.png)
         
+        水色　：隣同士を結線する。
+        その他：同じ色同士を結線する。
         試作基板のKiCADデータをROM28toEPROM32フォルダに格納しました。
 
     * ROMライタ(TL866II Plusなど)
