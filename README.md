@@ -4,6 +4,7 @@
 IPL-ROM 1.3 Patch for Xellent30とは、Xellent30(s/PRO)を装着したX68000で利用するIPL-ROM 1.3へのパッチです。
 
 このパッチを適用したIPL-ROM 1.3には以下の特徴があります。
+
 【メリット】
 * Xellent30の制御ツールであるch30.sysをSRAMに登録する必要がなくなる。
 * デフォルトの動作CPUがMC68030になる。
