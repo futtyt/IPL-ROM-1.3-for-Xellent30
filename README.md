@@ -59,6 +59,7 @@ https://youtu.be/Bep6caA0rm4
         ![1MbitROM](https://user-images.githubusercontent.com/79849812/109984038-bef76880-7d46-11eb-974c-343d74adccec.png)
         
         水色　：隣同士を結線する。</br>
+        灰色　：どこにも結線しない。</br>
         その他：同じ色同士を結線する。</br>
         試作基板のKiCADデータをROM28toEPROM32フォルダに格納しました。
 
