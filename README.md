@@ -31,6 +31,7 @@ https://youtu.be/Bep6caA0rm4
 以下の構成で動作することを確認しています。
 * X68000 PRO + Xellent30PRO + W27C512 x 2
 * X68000 SUPER + Xellent30s + W27E010 x 2
+* X68000 XVI + Xellent30s + W27E010 x 2
 
 # 導入方法
 1. 事前に以下のものを用意してください。
