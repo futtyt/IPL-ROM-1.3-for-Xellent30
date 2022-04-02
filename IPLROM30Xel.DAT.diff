@@ -1,6 +1,6 @@
---- base/IPLROM30Xel.DAT.s	Tue Mar  2 23:05:37 2021
-+++ 0.0.4/IPLROM30Xel.DAT.s	Sat Jul  3 17:11:36 2021
-@@ -8227,10 +8227,12 @@
+--- base\IPLROM30Xel.DAT.s	2022-04-02 23:23:34.391616300 +0900
++++ current\IPLROM30Xel.DAT.s	2022-04-03 00:48:08.921562000 +0900
+@@ -4147,10 +4147,12 @@
  	.dc.l	$00ff9340,$00000000
  	.dc.l	$00000000,$203c1392
  	.dc.l	$11274e75
@@ -15,7 +15,7 @@
  	moveq.l	#$00,d5
  	cmp.l	(Lff1af6,pc),d0
  	bne	Lff0052
-@@ -8238,6 +8240,12 @@
+@@ -4158,6 +4160,12 @@
  	bne	Lff0052
  	moveq.l	#$ff,d5
  Lff0052:
@@ -28,7 +28,7 @@
  	move.l	($0030),d6
  	lsl.l	#8,d6
  	lsr.l	#8,d6
-@@ -8273,7 +8281,7 @@
+@@ -4191,7 +4199,7 @@
  	dbra	d0,Lff00a0
  	lea.l	(Lff07be,pc),a0
  	move.l	a0,($07fc)
@@ -37,7 +37,7 @@
  	move.l	a0,($07f8)
  	lea.l	(Lff07cc,pc),a0
  	move.l	a0,($07f4)
-@@ -8355,7 +8363,7 @@
+@@ -4273,7 +4281,7 @@
  	move.w	#$2000,sr
  	bsr	Lff05be
  	move.b	($00ed0028),($00e8e001)
@@ -46,7 +46,7 @@
  	move.b	#$04,($00e8a01f)
  	tst.b	($00e9a001)
  	tst.b	($00e9a001)
-@@ -8450,159 +8458,167 @@
+@@ -4368,159 +4376,167 @@
  	bsr	Lff080a
  	jsr	(a0)
  	bra	Lff1a16
@@ -294,11 +294,6 @@
 -	bsr	Lff080a
 -	jsr	(a3)
 -	rts
--
--Lff0486:
--	movea.l	a6,a7
--	move.l	a2,($0008)
--	rts
 +	IOCS	_B_DRVSNS					; ドライブの状態検査をして
 +	btst.l	#$1d,d0						; FDC ステータス ドライブのReady信号の状態が
 +	bne	Lff03be                                         ; 有効であればLff03beへジャンプする。無効であれば
@@ -333,6 +328,11 @@
 +	move.l	a2,($0008)					; 例外ベクタ アドレスエラーを元に戻す。
 +	rts							; 呼び出し元に戻る。
  
+-Lff0486:
+-	movea.l	a6,a7
+-	move.l	a2,($0008)
+-	rts
+-
 -Lff048e:
 +Lff048e:	; 起動処理 RAM
  	movea.l	($00ed0010),a0
@@ -350,7 +350,7 @@
  	move.w	#$8000,d1
  Lff04ac:
  	bsr	Lff04be
-@@ -8614,7 +8630,7 @@
+@@ -4532,7 +4548,7 @@
  Lff04bc:
  	rts
  
@@ -359,7 +359,7 @@
  	moveq.l	#$00,d2
  	move.l	#$00000400,d3
  	lea.l	($2000),a1
-@@ -8629,90 +8645,90 @@
+@@ -4547,90 +4563,90 @@
  	bne	Lff04f0
  	cmpi.b	#$60,(a1)
  	bne	Lff04f0
@@ -512,7 +512,7 @@
  
  Lff05be:
  	move.l	#$ffffffff,($09d2)
-@@ -9240,7 +9256,7 @@
+@@ -5158,7 +5174,7 @@
  	suba.l	d0,a0
  	cmpa.w	#$0006,a0
  	beq	Lff0e00
@@ -521,7 +521,368 @@
  	bra	Lff0e00
  Lff0e30:
  	nop
-@@ -26041,8 +26057,229 @@
+@@ -13093,21 +13109,21 @@
+ 	move.l	d0,($0944)
+ 	rts
+ 
+-Lff7234:
+-	cmp.b	#$08,d2
+-	bne	Lff723c
+-	moveq.l	#$00,d2
++L_IOCS_FNTADR_16:	; フォントアドレスの収得(d1.w 漢字コード(Shift-JIS/JIS)、d2.b パターンの大きさ)
++	cmp.b	#$08,d2						; パターンの大きさが8 8x16,16x16ドット
++	bne	Lff723c						; でなければLff723cへジャンプする。
++	moveq.l	#$00,d2						; パターンの大きさを0クリアする。
+ Lff723c:
+-	cmp.w	#$2121,d1
+-	bcs	Lff73bc
+-	cmpi.w	#$f000,d1
+-	bcc	Lff7424
+-	cmpi.w	#$8140,d1
+-	bcc	Lff7276
+-	cmp.w	#$7e7f,d1
+-	bcc	Lff73ac
+-	moveq.l	#$00,d0
+-	move.b	d1,d0
++	cmp.w	#$2121,d1					; 漢字コードが$2121
++	bcs	Lff73bc						; より小さければLff73bcへジャンプする。
++	cmpi.w	#$f000,d1					; 漢字コードが$f000～$ffff
++	bcc	Lff7424						; であればLff7424へジャンプする。
++	cmpi.w	#$8140,d1					; 漢字コードが$8140～$efff
++	bcc	Lff7276						; であればLff7276へジャンプする。
++	cmp.w	#$7e7f,d1					; 漢字コードが$7e7f～$813f
++	bcc	Lff73ac						; であればLff73acへジャンプする。
++	moveq.l	#$00,d0						; 漢字コードが$2121～$7e7eであればD0レジスタを0クリアする。
++	move.b	d1,d0						; D0レジスタを漢字コードの下位バイトにする。
+ 	lsr.w	#8,d1
+ 	sub.w	#$0021,d1
+ 	cmp.w	#$007f,d0
+@@ -13118,7 +13134,7 @@
+ 	moveq.l	#$07,d0
+ 	moveq.l	#$01,d1
+ 	bra	Lff72b4
+-Lff7276:
++Lff7276:	; 漢字コードが$8140～$efffの場合
+ 	moveq.l	#$00,d0
+ 	move.b	d1,d0
+ 	lsr.w	#8,d1
+@@ -13213,79 +13229,79 @@
+ 	.dc.b	$00,$00,$00,$00,$00,$00,$00,$00
+ 	.dc.b	$ff,$ff,$ff,$01,$01,$ff,$ff,$00
+ Lff7366:
+-	and.l	#$000000ff,d1
+-	cmp.w	#$005c,d1
+-	bcc	Lff7374
++	and.l	#$000000ff,d1					; 漢字コードの下位バイトを抽出する。
++	cmp.w	#$005c,d1					; 漢字コードの下位バイトが'\'
++	bcc	Lff7374						; 以上であればLff7374へジャンプする。
+ Lff7372:
+-	rts
++	rts							; Lff73bcへ戻る。
+ 
+-Lff7374:
+-	lea.l	($00ed0059),a0
+-	beq	Lff7394
+-	cmp.w	#$007e,d1
+-	beq	Lff73a0
+-	cmp.w	#$007c,d1
+-	bne	Lff7372
+-	btst.b	#$02,(a0)
+-	beq	Lff7372
+-	move.w	#$0082,d1
+-	bra	Lff7372
+-Lff7394:
+-	btst.b	#$00,(a0)
+-	beq	Lff7372
+-	move.w	#$0080,d1
+-	bra	Lff7372
+-Lff73a0:
+-	btst.b	#$01,(a0)
+-	beq	Lff7372
+-	move.w	#$0081,d1
+-	bra	Lff7372
+-Lff73ac:
+-	cmp.w	#$80a6,d1
+-	bcs	Lff73bc
+-	cmp.w	#$80de,d1
+-	bcc	Lff73bc
+-	eori.b	#$20,d1
+-Lff73bc:
+-	bsr	Lff7366
+-	cmp.b	#$06,d2
+-	bcs	Lff73e4
+-	beq	Lff73f6
+-	move.l	#$00f3d000,d0
++Lff7374:							; 漢字コードの下位バイトが'\'以上の場合
++	lea.l	($00ed0059),a0					; A0レジスタをSRAM $7c,$7e,$5c(\~|) の文字変換フラグのアドレスにする。
++	beq	Lff7394						; 漢字コードの下位バイトが'\'であればLff7394へジャンプする。
++	cmp.w	#$007e,d1					; 漢字コードの下位バイトが'~'
++	beq	Lff73a0						; であればLff73a0へジャンプする。
++	cmp.w	#$007c,d1					; 漢字コードの下位バイトが'|'
++	bne	Lff7372						; でなければLff7372へジャンプする。
++	btst.b	#$02,(a0)					; SRAM $7c,$7e,$5c(\~|) の文字変換フラグのbit 2が
++	beq	Lff7372						; 0:｜ であればLff7372へジャンプする。
++	move.w	#$0082,d1					; 1:｜(破線)あれば漢字コードの下位バイトを$0082にして
++	bra	Lff7372						; Lff7372へジャンプする。
++Lff7394:							; 漢字コードの下位バイトが'\'の場合
++	btst.b	#$00,(a0)					; SRAM $7c,$7e,$5c(\~|) の文字変換フラグのbit 0が
++	beq	Lff7372						; 0:￥であればLff7372へジャンプする。
++	move.w	#$0080,d1					; 1:＼であれば漢字コードの下位バイトを$0080にして
++	bra	Lff7372						; Lff7372へジャンプする。
++Lff73a0:							; 漢字コードの下位バイトが'~'の場合
++	btst.b	#$01,(a0)					; SRAM $7c,$7e,$5c(\~|) の文字変換フラグのbit 1が
++	beq	Lff7372						; 0:￣であればLff7372へジャンプする。
++	move.w	#$0081,d1					; 1:～であれば漢字コードの下位バイトを$0081にして
++	bra	Lff7372						; Lff7372へジャンプする。
++Lff73ac:							; 漢字コードが$7e7f～$813fの場合
++	cmp.w	#$80a6,d1					; 漢字コードが$7e7f～$80a5の場合
++	bcs	Lff73bc						; Lff73bcへジャンプする。
++	cmp.w	#$80de,d1					; 漢字コードが$80de～$813fの場合
++	bcc	Lff73bc						; Lff73bcへジャンプする。
++	eori.b	#$20,d1						; 漢字コードが$80a6～$813eであれば漢字コードの下位バイトを$20で排他的論理和する。
++Lff73bc:							; 漢字コードが$2121より小さい場合
++	bsr	Lff7366						; Lff7366を呼出す。
++	cmp.b	#$06,d2						; パターンの大きさが
++	bcs	Lff73e4						; 12であればLff73e4へジャンプする。
++	beq	Lff73f6						; 6であればLff73f6へジャンプする。
++	move.l	#$00f3d000,d0					; 8であれば返値(パターンアドレス)を$00f3d000にする。
+ Lff73cc:
+-	lsl.l	#4,d1
+-	add.l	d1,d0
+-	add.l	d1,d0
+-	add.l	d1,d0
++	lsl.l	#4,d1						; [12x24]漢字コードを16倍にする。
++	add.l	d1,d0						; [12x24]返値(パターンアドレス)を6x12ドットフォントの先頭から
++	add.l	d1,d0						; [12x24]漢字コード * 32ワード
++	add.l	d1,d0						; [12x24]の位置にする。
+ Lff73d4:
+-	cmp.b	#$06,d2
+-	beq	Lff740c
+-	move.l	#$000c0001,d1
+-	moveq.l	#$17,d2
+-	rts
++	cmp.b	#$06,d2						; パターンの大きさが
++	beq	Lff740c						; 6であればLff740cへジャンプする。
++	move.l	#$000c0001,d1					; [12x24]パターンの X 方向のドット数を12にして、パターンの X 方向のバイト数-1を1にする。
++	moveq.l	#$17,d2						; [12x24]パターンの Y 方向のドット数-1を23にする。
++	rts							; [12x24]呼出し元に戻る。
+ 
+ Lff73e4:
+-	move.l	#$00f3a800,d0
++	move.l	#$00f3a800,d0					; [ 8x16]返値(パターンアドレス)を8x16ドットフォントの先頭にする。
+ Lff73ea:
+-	lsl.l	#4,d1
+-	add.l	d1,d0
++	lsl.l	#4,d1						; [ 8x16]返値(パターンアドレス)を8x16ドットフォントの先頭から
++	add.l	d1,d0						; [ 8x16]漢字コード * 16バイトの位置にする。
+ Lff73ee:
+-	moveq.l	#$08,d1
+-	swap.w	d1
+-	moveq.l	#$0f,d2
+-	rts
+-
+-Lff73f6:
+-	move.l	#$00fbf400,d0
+-	lsl.l	#2,d1
+-	add.l	d1,d0
+-	add.l	d1,d0
+-	add.l	d1,d0
++	moveq.l	#$08,d1						; [ 8x16]パターンの X 方向のドット数を8
++	swap.w	d1						; [ 8x16]にして、パターンの X 方向のバイト数-1を0にする。
++	moveq.l	#$0f,d2						; [ 8x16]パターンの Y 方向のドット数-1を15にする。
++	rts							; [ 8x16]呼出し元に戻る。
++
++Lff73f6:							; [ 6x12]パターンの大きさが6の場合
++	move.l	#$00fef400,d0					; [ 6x12]返値(パターンアドレス)を6x12ドットフォントの先頭にする。★000機でも6x12ドットフォントを使えるようにする。 $00fbf400→$00fef400
++	lsl.l	#2,d1						; [ 6x12]漢字コードを4倍にする。
++	add.l	d1,d0						; [ 6x12]返値(パターンアドレス)を6x12ドットフォントの先頭から
++	add.l	d1,d0						; [ 6x12]漢字コード * 12バイト
++	add.l	d1,d0						; [ 6x12]の位置にする。
+ Lff7404:
+-	moveq.l	#$06,d1
+-	swap.w	d1
+-	moveq.l	#$0b,d2
+-	rts
++	moveq.l	#$06,d1						; [ 6x12]パターンの X 方向のドット数を6
++	swap.w	d1						; [ 6x12]にして、パターンの X 方向のバイト数-1を0にする。
++	moveq.l	#$0b,d2						; [ 6x12]パターンの Y 方向のドット数-1を11にする。
++	rts							; [ 6x12]呼出し元に戻る。
+ 
+ Lff740c:
+ 	bsr	Lff74fe
+@@ -13297,7 +13313,7 @@
+ 	beq	Lff73ea
+ 	move.l	($09ae),d0
+ 	bra	Lff73cc
+-Lff7424:
++Lff7424:	; 漢字コードが$f000～$ffffの場合
+ 	and.l	#$0000ffff,d1
+ 	cmp.w	#$f400,d1
+ 	bcc	Lff7412
+@@ -22521,58 +22537,52 @@
+ 
+ Lffd260:
+ 	movem.l	d1-d3/a1-a4,-(a7)
+-	lea.l	($0009,a6),a2
+-	lea.l	($000d,a6),a3
+-	lea.l	($0015,a6),a4
+-	tst.l	d3
+-	bne	Lffd278
+-	move.w	#$0100,d3
++	lea.l	($0009,a6),a2					; A2レジスタをSPC INTSにする。
++	lea.l	($000d,a6),a3					; A3レジスタをSPC SSTSにする。
++	lea.l	($0015,a6),a4					; A4レジスタをSPC DREG(データ入出力を行うレジスタ. 8 バイトの FIFO バッファとなっている.)にする。
++	tst.l	d3						; 読込むバイト数が
++	bne	Lffd278						; 0でなければLffd278へジャンプする。
++	move.w	#$0100,d3					; 0であれば読込むバイト数を256バイトにする。
+ Lffd278:
+-	move.b	($000b,a6),d0
+-	andi.b	#$07,d0
+-	move.b	d0,($0011,a6)
+-	move.l	#Lffffff,d0
+-	and.l	d3,d0
+-	movep.l	d0,($0017,a6)
+-	move.b	(a2),(a2)
+-	move.b	#$80,($0005,a6)
++	move.b	($000b,a6),d0					; D4レジスタをSPC SDGCの値にする。
++	andi.b	#$07,d0						; SPC SDGCのDiag MSG、Diag C/D、Diag I/Oを抽出する。
++	move.b	d0,($0011,a6)					; SPC PCTLのBusfree INT Enableを0に、Transfer Phase MSG、Transfer Phase C/D、Transfer Phase I/OをSDGCのDiag MSG、Diag C/D、Diag I/Oにする。
++	move.l	#Lffffff,d0					; D0レジスタを$ffffffにする。
++	and.l	d3,d0						; 読込むバイト数を$1～$ffffffに制限する。
++	movep.l	d0,($0017,a6)					; SPC TEMPを読込むバイト数にする。
++	move.b	(a2),(a2)					; SPC INTSを同じ値で上書きする。
++	move.b	#$80,($0005,a6)					; SPC SMDのCommand CodeをTransfer(%100)にする。
+ Lffd298:
+-	move.b	(a3),d0
+-	andi.b	#$f0,d0
+-	cmp.b	#$70,d0
+-	beq	Lffd2ba
+-	cmp.b	#$b0,d0
+-	bne	Lffd298
+-	tst.b	($00ed0070)
+-	bmi	Lffd314
++	move.b	(a3),d0						; D0レジスタをSPC SSTSの値にする。
++	andi.b	#$f0,d0						; SSTSのConnected、SPC Busy、Transfer in progressを抽出する。
++	cmp.b	#$70,d0						; SSTSのConnectedが「ターゲットとして結合中」、SPC Busyが「コマンド実行中/実行待ち状態である」、Transfer in progressが「ハード転送実行中/SCSI で転送フェーズが要求されている」
++	beq	Lffd2ba						; であればLffd2baへジャンプする。
++	cmp.b	#$b0,d0						; SSTSのConnectedが「イニシエータとして結合中」、SPC Busyが「コマンド実行中/実行待ち状態である」、Transfer in progressが「ハード転送実行中/SCSI で転送フェーズが要求されている」
++	bne	Lffd298						; でなければLffd298へ戻る。
++	tst.b	($00ed0070)					; SRAM SCSI 関係(bit 7～4 は X68030 以降で有効) bit 7	 転送ブロックサイズ(0:256 1:512;$cc0で可変)が
++	bmi	Lffd314						; 1であればLffd314へジャンプする。
+ Lffd2b2:
+-	move.l	d3,d0
+-	lsr.l	#3,d0
+-	beq	Lffd2e8
+-	move.l	d0,d2
+-Lffd2ba:
+-	tst.b	(a2)
+-	bne	Lffd300
+-	btst.b	#$01,(a3)
+-	beq	Lffd2ba
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	move.l	d0,(a1)+
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	move.l	d0,(a1)+
+-	subq.l	#1,d2
+-	bne	Lffd2ba
++	move.l	d3,d0						; D0レジスタを読込むバイト数にする。
++	lsr.l	#3,d0						; 読込むバイト数が
++	beq	Lffd2e8						; 8バイト未満であればLffd2e8へジャンプする。
++	move.l	d0,d2						; D2レジスタを読込む回数(読込むバイト数を8で割った値)にする。
++Lffd2ba: 	; 8バイト単位の読込み処理
++	tst.b	(a2)						; SPC INTSのすべての状態が
++	bne	Lffd300						; 通常動作でなければLffd300へジャンプする。
++	btst.b	#$01,(a3)					; SPC SSTSのDREG statusが
++	beq	Lffd2ba						; 「8 バイトのデータがある」でなければLffd2baへ戻る。
++	move.b	(a4),(a1)+					; ★MC68000でRASDRV上のLHAファイルを開くとエラーが発生する箇所。
++	move.b	(a4),(a1)+					; a1が奇数アドレスの場合にエラーとなるmove.l d0,(a1)+をmove.b (a4),(a1)+に置換えた。
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	subq.l	#1,d2						; 読込み回数に達するまで
++	bne	Lffd2ba						; Lffd2baへ戻る。
++	bra	Lffd2e8						; move.b (a4),(a1)+への置換えによるサイズ調整のためのジャンプを追加した。
++	.dcb.b	14,$ff						; 14バイトの空き
+ Lffd2e8:
+ 	and.w	#$0007,d3
+ 	beq	Lffd300
+@@ -22610,43 +22620,28 @@
+ 	beq	Lffd324
+ 	move.w	d2,d1
+ Lffd330:
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	move.l	d0,(a1)+
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	move.l	d0,(a1)+
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	move.l	d0,(a1)+
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	lsl.l	#8,d0
+-	move.b	(a4),d0
+-	move.l	d0,(a1)+
++	move.b	(a4),(a1)+					; ★MC68000でRASDRV上のLHAファイルを開くとエラーが発生する箇所。
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
++	move.b	(a4),(a1)+
+ 	dbra	d1,Lffd330
+ 	subq.w	#1,d3
+ 	bne	Lffd324
+ 	swap.w	d3
+ 	bra	Lffd2b2
++	.dcb.b	32,$ff						; 14バイトの空き
+ Lffd37e:
+ 	movem.l	d1-d3/a1-a3,-(a7)
+ 	lea.l	($000b,a6),a2
+@@ -25284,8 +25279,229 @@
  	nop
  	jmp	(a0)
  

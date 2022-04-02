@@ -48,6 +48,11 @@ https://youtu.be/Bep6caA0rm4
         X68030実機にてDB.Xを起動して以下のコマンドを入力する。  
         ```-w ROM30.DAT,fc0000 fdffff```
 
+    * X68000のIPL-ROM $fe0000～$ffffff (6x12ドットフォント組込み用)
+
+        X68000実機にてDB.Xを起動して以下のコマンドを入力する。  
+        ```-w IPLROM.DAT,fe0000 ffffff```
+
     * UV-EPROM、EEPROM、FlashROM
 
         機種によって容量が異なります。  
@@ -69,8 +74,9 @@ https://youtu.be/Bep6caA0rm4
 1. ROMイメージの生成
     1. ソースコードを利用する場合
         1. dis.xを以下のオプションで実行してソースコードを生成する。
+            ※0.0.5からdisのオプションが変わりましたので注意してください。
             ```
-            dis IPLROM30Xel.DAT IPLROM30Xel.DAT.s -zfe0000,ff0038 -q -m680x0
+            dis -zfe0000,ff0038 -q -m680x0 --overwrite -h IPLROM30Xel.DAT IPLROM30Xel.DAT.s
             ```
         1. テキストマージツールで本パッチを適用する。
         1. 添付のMakefileでソースコードをコンパイル、リンク、変換する。
@@ -82,6 +88,9 @@ https://youtu.be/Bep6caA0rm4
             ```
     1. バイナリ差分を利用する場合
         1. バイナリ差分ファイルを適用する。
+
+1. 6x12ドットフォントの組込み
+    1. 同梱のxfontconvine.exeを利用してIPLROM30Xel.DATにIPLROM.DAT内の6x12ドットフォントを組込みます。
 
 1. ROMイメージの書込みと装着
     1. SCSI機の場合はROM30.DATとIPLROM30Xel.DATを結合する。
