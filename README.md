@@ -10,7 +10,7 @@ IPL-ROM 1.3 Patch for Xellent30とは、Xellent30(s/PRO)を装着したX68000で
 * デフォルトの動作CPUがMC68030になる。
 * 起動画面表示中にXF2キー押下でMC68000へ、XF4キー押下でMC68030へ動作CPUを切替える。
 * ソフトウェアリセット時はリセット前の動作CPUを維持する。
-* SUPERでは内蔵SCSIも利用できる。(XVIは未確認)
+* SUPER、XVIでは内蔵SCSIも利用できる。(XVIはXellent30sで確認)
 
 【プラマイゼロ？】
 * 拡張SRAMの開始アドレスは$FC0000固定となり、IPL-ROMのアクセス先が拡張SRAMとなる。(拡張SRAMを自由に使えなくなりますが、IPL-ROMへのアクセスが若干早くなります。)
